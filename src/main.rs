@@ -41,7 +41,7 @@ fn main() {
         println!("Running");
         let mem_ptr = memory.as_mut_ptr();
         println!("{:?}", mem_ptr);
-        main(mem_ptr)
+        main(mem_ptr, interface::on_mem_read, interface::on_mem_write)
     }
     println!("{:?}", memory)
 }
@@ -82,4 +82,6 @@ fn compile_asm_and(src: &str) -> Result<()> {
     Ok(())
 }
 
-type CompiledMain = unsafe extern "C" fn(mem_space: *mut u8);
+type MemoryHandler = unsafe extern "C" fn(mem_space: *mut u8, addr: usize);
+
+type CompiledMain = unsafe extern "C" fn(mem_space: *mut u8, on_mem_read: MemoryHandler, on_mem_write: MemoryHandler);

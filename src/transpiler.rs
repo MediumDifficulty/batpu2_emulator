@@ -98,92 +98,75 @@ impl Instruction {
     }
 
     pub fn to_nasm(&self, label_map: &HashMap<u16, String>) -> String {
+        fn get_dest_str(reg: u8) -> String {
+            if reg == 0 {
+                "al".into()
+            } else {
+                format!("[reg + {reg}]")
+            }
+        }
+
         match self {
-            Instruction::Nop => "\tnop".into(),
-            Instruction::Hlt => "\tmov rsp, [ret_addr]\n\tret".into(),
+            Instruction::Nop => include_str!("intrinsics/nop.asm").into(),
+            Instruction::Hlt => include_str!("intrinsics/hlt.asm").into(),
             Instruction::Add(a, b, c) => {
-                let dest = if *c == 0 {
-                    "al".into()
-                } else {
-                    format!("[reg + {c}]")
-                };
-                format!("\tmov cl, [reg + {a}]\n\tmov dl, [reg + {b}]\n\tmov {dest}, cl\n\tadd {dest}, dl")
+                let dest = get_dest_str(*c);
+
+                format!(include_str!("intrinsics/add.asm"), a = a, b = b, dest = dest)
+                // format!("\tmov cl, [reg + {a}]\n\tmov dl, [reg + {b}]\n\tmov {dest}, cl\n\tadd {dest}, dl")
             },
             Instruction::Sub(a, b, c) => {
-                let dest = if *c == 0 {
-                    "al".into()
-                } else {
-                    format!("[reg + {c}]")
-                };
-                format!("\tmov cl, [reg + {a}]\n\tmov dl, [reg + {b}]\n\tmov {dest}, cl\n\tsub {dest}, dl")
+                let dest = get_dest_str(*c);
+                
+                format!(include_str!("intrinsics/sub.asm"), a = a, b = b, dest = dest)
+                // format!("\tmov cl, [reg + {a}]\n\tmov dl, [reg + {b}]\n\tmov {dest}, cl\n\tsub {dest}, dl")
             },
             Instruction::Nor(a, b, c) => {
-                let dest = if *c == 0 {
-                    "al".into()
-                } else {
-                    format!("[reg + {c}]")
-                };
-                format!("\tmov cl, [reg + {a}]\n\tmov dl, [reg + {b}]\n\tmov {dest}, cl\n\tor {dest}, dl\n\tnot byte {dest}")
+                let dest = get_dest_str(*c);
+                
+                format!(include_str!("intrinsics/nor.asm"), a = a, b = b, dest = dest)
+                // format!("\tmov cl, [reg + {a}]\n\tmov dl, [reg + {b}]\n\tmov {dest}, cl\n\tor {dest}, dl\n\tnot byte {dest}")
             },
             Instruction::And(a, b, c) => {
-                let dest = if *c == 0 {
-                    "al".into()
-                } else {
-                    format!("[reg + {c}]")
-                };
-                format!("\tmov cl, [reg + {a}]\n\tmov dl, [reg + {b}]\n\tmov {dest}, cl\n\tand {dest}, dl")
+                let dest = get_dest_str(*c);
+                
+                format!(include_str!("intrinsics/and.asm"), a = a, b = b, dest = dest)
             },
             Instruction::Xor(a, b, c) => {
-                let dest = if *c == 0 {
-                    "al".into()
-                } else {
-                    format!("[reg + {c}]")
-                };
-                format!("\tmov cl, [reg + {a}]\n\tmov dl, [reg + {b}]\n\tmov {dest}, cl\n\txor {dest}, dl")
+                let dest = get_dest_str(*c);
+                format!(include_str!("intrinsics/xor.asm"), a = a, b = b, dest = dest)
+                // format!("\tmov cl, [reg + {a}]\n\tmov dl, [reg + {b}]\n\tmov {dest}, cl\n\txor {dest}, dl")
             },
             Instruction::Rsh(a, c) => {
-                let dest = if *c == 0 {
-                    "al".into()
-                } else {
-                    format!("[reg + {c}]")
-                };
-                format!("\tmov cl, [reg + {a}]\n\tshr cl, 1\n\tmov {dest}, cl")
+                let dest = get_dest_str(*c);
+                
+                format!(include_str!("intrinsics/rsh.asm"), a = a, dest = dest)
+                // format!("\tmov cl, [reg + {a}]\n\tshr cl, 1\n\tmov {dest}, cl")
             },
             Instruction::Ldi(a, i) => {
-                let dest = if *a == 0 {
-                    "al".into()
-                } else {
-                    format!("[reg + {a}]")
-                };
-                format!("\tmov byte {dest}, {i}")
+                let dest = get_dest_str(*a);
+                format!(include_str!("intrinsics/ldi.asm"), i = i, dest = dest)
             },
             Instruction::Adi(a, i) => {
-                let dest = if *a == 0 {
-                    "al".into()
-                } else {
-                    format!("[reg + {a}]")
-                };
-                format!("\tadd byte {dest}, {i}")
+                let dest = get_dest_str(*a);
+                format!(include_str!("intrinsics/adi.asm"), i = i, dest = dest)
             },
-            Instruction::Jmp(a) => format!("\tjmp {}", label_map[a]),
+            Instruction::Jmp(a) => format!(include_str!("intrinsics/jmp.asm"), l = label_map[a]),
             Instruction::Brh(c, a) => match c {
-                Condition::Equal => format!("\tjz {}", label_map[a]),
-                Condition::NotEqual => format!("\tjnz {}", label_map[a]),
-                Condition::GreaterThanOrEqual => format!("\tjc {}", label_map[a]),
-                Condition::LessThan => format!("\tjnc {}", label_map[a]),
+                Condition::Equal => format!(include_str!("intrinsics/brh/eq.asm"), l = label_map[a]),
+                Condition::NotEqual => format!(include_str!("intrinsics/brh/ne.asm"), l = label_map[a]),
+                Condition::GreaterThanOrEqual =>  format!(include_str!("intrinsics/brh/ge.asm"), l = label_map[a]),
+                Condition::LessThan => format!(include_str!("intrinsics/brh/lt.asm"), l = label_map[a]),
             },
-            Instruction::Cal(a) => format!("\tcall {}", label_map[a]),
-            Instruction::Ret => "\tret".into(),
+            Instruction::Cal(a) => format!(include_str!("intrinsics/cal.asm"), l = label_map[a]),
+            Instruction::Ret => include_str!("intrinsics/ret.asm").into(),
             Instruction::Lod(a, b, o) => {
-                let dest = if *b == 0 {
-                    "al".into()
-                } else {
-                    format!("[reg + {b}]")
-                };
-                format!("\tmov cl, [reg + {a}]\n\tadd cl, {o}\n\tmovzx rcx, cl\n\tmov dl, [r8 + rcx]\n\tmov {dest}, dl")
+                let dest = get_dest_str(*b);
+                format!(include_str!("intrinsics/lod.asm"), a = a, o = o, dest = dest)
+                // format!("\tmov r8, reg\n\tmov cl, [reg + {b}]\n\tadd cl, {o}\n\tmovzx rcx, cl\n\tmov dl, [r8 + rcx]\n\tmov {dest}, dl") "\tmov cl, [reg + {a}]\n\tadd cl, {o}\n\tmovzx rcx, cl\n\tmov dl, [r8 + rcx]\n\tmov {dest}, dl")
             },
             Instruction::Str(a, b, o) => {
-                format!("\tmov cl, [reg + {a}]\n\tadd cl, {o}\n\tmovzx rcx, cl\n\tmov dl, [reg + {b}]\n\tmov [r8 + rcx], dl")
+                format!(include_str!("intrinsics/str.asm"), a = a, b = b, o = o)
             },
         }
     }

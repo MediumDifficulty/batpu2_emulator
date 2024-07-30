@@ -19,4 +19,6 @@ _DllMain:
 _main:
     mov [ret_addr], rsp
     mov [mem], rcx
+    mov [mem_read_callback], rdx
+    mov [mem_write_callback], r8
     mov r8, rcx
