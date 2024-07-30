@@ -3,7 +3,7 @@ pub mod transpiler;
 pub mod interface;
 pub mod ui;
 
-use std::{fs, path::PathBuf, process::Command, thread::{self, sleep}, time::Duration};
+use std::{fs, path::PathBuf, process::Command, thread};
 
 use anyhow::Result;
 use clap::Parser;
@@ -46,12 +46,12 @@ fn emulator_main() {
     unsafe {
         let lib = libloading::Library::new("temp/temp.dll").unwrap();
         let main: libloading::Symbol<CompiledMain> = lib.get(b"_main").unwrap();
-        println!("Running");
+        // println!("Running");
         let mem_ptr = memory.as_mut_ptr();
-        println!("{:?}", mem_ptr);
+        // println!("{:?}", mem_ptr);
         main(mem_ptr, interface::on_mem_read, interface::on_mem_write)
     }
-    println!("{:?}", memory)
+    // println!("{:?}", memory)
 }
 
 fn assemble_file(file: &str) {

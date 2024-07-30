@@ -22,6 +22,7 @@ pub static NUMBER_DISPLAY_DIRTY: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(fal
 pub static SHOW_NUMBER_DISPLAY: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
 pub static NUMBER_DISPLAY_SETTINGS: Lazy<Mutex<NumberDisplaySettings>> = Lazy::new(|| Mutex::new(NumberDisplaySettings::TwosCompliment));
 
+#[derive(Clone, Copy)]
 pub enum NumberDisplaySettings {
     TwosCompliment,
     Unsigned
@@ -31,7 +32,7 @@ pub enum NumberDisplaySettings {
 pub struct ControllerInfo(BitArray<[u8; 1], Lsb0>);
 
 pub unsafe extern "C" fn on_mem_read(mem: *mut u8, addr: usize) {
-    println!("Read {addr}");
+    // println!("Read {addr}");
     match addr {
         244 => { // Load Pixel at (Pixel X, Pixel Y)
             let (pixel_x, pixel_y) = get_pixel_coords(mem);
@@ -53,7 +54,7 @@ pub unsafe extern "C" fn on_mem_read(mem: *mut u8, addr: usize) {
 }
 
 pub unsafe extern "C" fn on_mem_write(mem: *mut u8, addr: usize) {
-    println!("Wrote to {addr}");
+    // println!("Wrote to {addr}");
     match addr {
         242 => { // Draw pixel at (Pixel X, Pixel Y) to buffer
             let (pixel_x, pixel_y) = get_pixel_coords(mem);
