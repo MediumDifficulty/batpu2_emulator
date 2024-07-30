@@ -16,6 +16,31 @@ _DllMain:
     mov eax, 1
     ret
 
+_set_flags:
+    jc _set_carry
+    jmp _unset_carry
+_sf1:
+    jz __set_zero
+    jmp __unset_zero
+_sf2:
+    ret
+
+_set_carry:
+    mov r14, 1
+    jmp _sf1
+
+_unset_carry:
+    mov r14, 0
+    jmp _sf1
+
+__set_zero:
+    mov r15, 1
+    jmp _sf2
+
+__unset_zero:
+    mov r15, 0
+    jmp _sf2
+
 _main:
     mov [ret_addr], rsp
     mov [mem], rcx

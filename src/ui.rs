@@ -36,7 +36,9 @@ pub fn ui_main() {
                         }
                     }
                     event::Event::Resize(_, y) => {
-                        origin.1 = y - 34;
+                        if y >= 34 {
+                            origin.1 = y - 34;
+                        }
                     }
                     _ => {}
                 }
@@ -56,6 +58,13 @@ pub fn ui_main() {
             *interface::SCREEN_BUFFER_DIRTY.lock().unwrap() = false;
         }
     }
+
+    execute!(w,
+        style::ResetColor,
+        cursor::Show,
+        cursor::MoveTo(origin.0, origin.1),
+        terminal::Clear(terminal::ClearType::FromCursorDown)
+    ).unwrap();
 
     disable_raw_mode().unwrap();
 }
