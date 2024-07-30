@@ -4,10 +4,9 @@
     movzx rdx, cl
     sub rsp, 8
     push rdx
-    mov rcx, [mem]
+    mov rcx, r12
     call [mem_read_callback]
-    mov r8, [mem]
     pop rdx
     add rsp, 8
-    mov cl, [r8 + rdx]
+    mov cl, [r12 + rdx]
     mov {dest}, cl
