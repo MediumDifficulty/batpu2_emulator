@@ -22,3 +22,4 @@ _main:
     mov [mem_read_callback], rdx
     mov [mem_write_callback], r8
     mov r8, rcx
+    sub rsp, 8

@@ -1,12 +1,14 @@
 pub mod cli;
 pub mod transpiler;
 pub mod interface;
+pub mod ui;
 
-use std::{fs, path::PathBuf, process::Command};
+use std::{fs, path::PathBuf, process::Command, thread::{self, sleep}, time::Duration};
 
 use anyhow::Result;
 use clap::Parser;
 use cli::Args;
+use ui::ui_main;
 
 fn main() {
     let args = Args::parse();
@@ -33,6 +35,12 @@ fn main() {
     let output = transpiler::transpile(&assembly);
     compile_asm_and(&output).unwrap();
 
+    let emulator_thread = thread::spawn(emulator_main);
+    ui_main();
+    emulator_thread.join().unwrap();
+}
+
+fn emulator_main() {
     let mut memory: [u8; 256] = [0; 256];
 
     unsafe {
