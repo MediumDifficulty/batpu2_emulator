@@ -50,11 +50,11 @@ pub fn ui_main() {
             *interface::NUMBER_DISPLAY_DIRTY.lock().unwrap() = false;
         }
         if *interface::CHARACTER_DISPLAY_DIRTY.lock().unwrap() {
-            draw_text_display(&interface::CHARACTER_DISPLAY.lock().unwrap());
+            draw_text_display(origin, &interface::CHARACTER_DISPLAY.lock().unwrap());
             *interface::CHARACTER_DISPLAY_DIRTY.lock().unwrap() = false;
         }
         if *interface::SCREEN_BUFFER_DIRTY.lock().unwrap() {
-            draw_screen(&interface::SCREEN_BUFFER.lock().unwrap());
+            draw_screen(origin, &interface::SCREEN_BUFFER.lock().unwrap());
             *interface::SCREEN_BUFFER_DIRTY.lock().unwrap() = false;
         }
     }
@@ -123,31 +123,32 @@ fn u8_to_decimal_array(mut n: u8) -> [u8; 3] {
 
 const TEXT_DISPLAY_POS: CharPos = (72, 8);
 
-fn draw_text_display(data: &str) {
+fn draw_text_display(origin: CharPos, data: &str) {
     execute!(
         stdout(),
-        cursor::MoveTo(TEXT_DISPLAY_POS.0, TEXT_DISPLAY_POS.1),
+        cursor::MoveTo(origin.0 + TEXT_DISPLAY_POS.0, origin.1 + TEXT_DISPLAY_POS.1),
         Print(format!("{data: <20}"))
     ).unwrap();
 }
 
 const SCREEN_POS: CharPos = (1, 1);
 
-fn draw_screen(data: &PixelBuffer) {
-    for (y, row) in data.iter().enumerate() {
-        for (x, pixel) in row.iter().enumerate() {
-            let x = SCREEN_POS.0 + x as u16 * 2;
-            let y = SCREEN_POS.1 + y as u16;
+fn draw_screen(origin: CharPos, data: &PixelBuffer) {
+    for y in 0..32 {
+        for x in 0..32 {
+            let pixel = data[31 - y][x];
+            let x = origin.0 + SCREEN_POS.0 + x as u16 * 2;
+            let y = origin.1 + SCREEN_POS.1 + y as u16;
             
             execute!(
                 stdout(),
                 cursor::MoveTo(x, y),
-                style::SetBackgroundColor(if *pixel {
+                style::SetBackgroundColor(if pixel {
                     Color::White
                 } else {
-                    Color::Grey
+                    Color::DarkGrey
                 }),
-                Print(pixel)
+                Print("  ")
             ).unwrap();
         }
     }
