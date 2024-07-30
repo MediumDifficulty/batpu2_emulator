@@ -42,16 +42,18 @@ fn main() {
 
 fn emulator_main() {
     let mut memory: [u8; 256] = [0; 256];
+    let mut registers: [u8; 16] = [0; 16];
 
     unsafe {
         let lib = libloading::Library::new("temp/temp.dll").unwrap();
         let main: libloading::Symbol<CompiledMain> = lib.get(b"_main").unwrap();
         // println!("Running");
         let mem_ptr = memory.as_mut_ptr();
+        let reg_ptr = registers.as_mut_ptr();
         // println!("{:?}", mem_ptr);
-        main(mem_ptr, interface::on_mem_read, interface::on_mem_write)
+        main(mem_ptr, reg_ptr, interface::on_mem_read, interface::on_mem_write)
     }
-    // println!("{:?}", memory)
+    // println!("{:?}", registers)
 }
 
 fn assemble_file(file: &str) {
@@ -92,4 +94,4 @@ fn compile_asm_and(src: &str) -> Result<()> {
 
 type MemoryHandler = unsafe extern "C" fn(mem_space: *mut u8, addr: usize);
 
-type CompiledMain = unsafe extern "C" fn(mem_space: *mut u8, on_mem_read: MemoryHandler, on_mem_write: MemoryHandler);
+type CompiledMain = unsafe extern "C" fn(mem_space: *mut u8, registers: *mut u8, on_mem_read: MemoryHandler, on_mem_write: MemoryHandler);

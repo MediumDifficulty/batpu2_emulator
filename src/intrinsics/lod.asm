@@ -1,5 +1,5 @@
     ; lod
-    mov cl, [reg + {a}]
+    mov cl, [r13 + {a}]
     add cl, {o}
     movzx rdx, cl
     sub rsp, 8

@@ -1,5 +1,6 @@
-    mov cl, [reg + {a}]
-    mov dl, [reg + {b}]
+    ; nor
+    mov cl, [r13 + {a}]
+    mov dl, [r13 + {b}]
     mov {dest}, cl
     or {dest}, dl
     not byte {dest}

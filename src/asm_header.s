@@ -1,7 +1,6 @@
 BITS 64
 
 section .bss
-    reg: resb 16
     ret_addr: resq 1
     mem_read_callback: resq 1
     mem_write_callback: resq 1
@@ -43,6 +42,7 @@ __unset_zero:
 _main:
     mov [ret_addr], rsp
     mov r12, rcx
-    mov [mem_read_callback], rdx
-    mov [mem_write_callback], r8
+    mov r13, rdx
+    mov [mem_read_callback], r8
+    mov [mem_write_callback], r9
     sub rsp, 8

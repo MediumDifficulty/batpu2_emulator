@@ -102,7 +102,7 @@ impl Instruction {
             if reg == 0 {
                 "al".into()
             } else {
-                format!("[reg + {reg}]")
+                format!("[r13 + {reg}]")
             }
         }
 
