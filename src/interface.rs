@@ -1,4 +1,4 @@
-use std::{mem, sync::Mutex};
+use std::sync::Mutex;
 
 use arrayvec::ArrayString;
 use bitvec::{array::BitArray, order::Lsb0};
@@ -14,6 +14,7 @@ static CHARACTER_BUFFER: Lazy<Mutex<ArrayString<20>>> = Lazy::new(|| Mutex::new(
 struct ControllerInfo(BitArray<[u8; 1], Lsb0>);
 
 pub unsafe extern "C" fn on_mem_read(mem: *mut u8, addr: usize) {
+    println!("Read {addr}");
     match addr {
         244 => { // Load Pixel at (Pixel X, Pixel Y)
             let (pixel_x, pixel_y) = get_pixel_coords(mem);
@@ -35,7 +36,7 @@ pub unsafe extern "C" fn on_mem_read(mem: *mut u8, addr: usize) {
 }
 
 pub unsafe extern "C" fn on_mem_write(mem: *mut u8, addr: usize) {
-    println!("{addr}");
+    println!("Wrote to {addr}");
     match addr {
         242 => { // Draw pixel at (Pixel X, Pixel Y) to buffer
             let (pixel_x, pixel_y) = get_pixel_coords(mem);

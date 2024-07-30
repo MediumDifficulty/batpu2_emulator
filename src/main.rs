@@ -2,7 +2,7 @@ pub mod cli;
 pub mod transpiler;
 pub mod interface;
 
-use std::{fs, path::{Path, PathBuf}, process::Command};
+use std::{fs, path::PathBuf, process::Command};
 
 use anyhow::Result;
 use clap::Parser;
