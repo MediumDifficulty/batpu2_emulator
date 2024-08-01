@@ -32,11 +32,13 @@ fn main() {
 
     let assembly = fs::read_to_string(assembled_file).unwrap();
 
-    let output = transpiler::transpile(&assembly);
+    let output = transpiler::transpile(&assembly, args.benchmark);
     compile_asm_and(&output).unwrap();
 
     let emulator_thread = thread::spawn(emulator_main);
-    ui_main();
+    if !args.no_gui {
+        ui_main();
+    }
     emulator_thread.join().unwrap();
 }
 

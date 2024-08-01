@@ -205,7 +205,7 @@ pub fn parse_mc_file(src: &str) -> Vec<u16> {
         .collect()
 }
 
-pub fn transpile(src: &str) -> String {
+pub fn transpile(src: &str, count_lines: bool) -> String {
     let parsed = parse_mc_file(src);
     let instructions = disassemble(&parsed);
     let labels = find_labels(&instructions);
@@ -224,7 +224,7 @@ pub fn transpile(src: &str) -> String {
         output += &format!("{}\n", instruction.to_nasm(&label_map));
     }
 
-    format!("{}\n{output}\n", include_str!("asm_header.s"))
+    format!("{}\n{output}\n", include_str!("asm_header.asm"))
 }
 
 fn find_labels(instructions: &[Instruction]) -> Vec<u16> {
