@@ -39,11 +39,12 @@ fn main() {
         let output = transpiler::transpile(&assembly, true);
         compile_asm(&output, "instruction_count").unwrap();
         println!("Counting instructions...");
-        let (instruction_count, _) = emulator_main("instruction_count");
+        let (instruction_count, _) = emulator_main("instruction_count", 1);
+        let instruction_count = instruction_count * args.iterations;
         println!("Instruction count: {instruction_count}");
 
-        let emulator_thread = thread::spawn(|| {
-            emulator_main("compiled").1
+        let emulator_thread = thread::spawn(move || {
+            emulator_main("compiled", args.iterations).1
         });
 
         if !args.no_gui {
@@ -54,7 +55,7 @@ fn main() {
         println!("Emulator ran {instruction_count} instructions in {}ms ({}mips)", time.as_millis(), ((instruction_count as u128 / time.as_millis()) / 1000))
 
     } else {
-        let emulator_thread = thread::spawn(|| emulator_main("compiled"));
+        let emulator_thread = thread::spawn(move || emulator_main("compiled", args.iterations));
         if !args.no_gui {
             ui_main();
         }
@@ -62,7 +63,7 @@ fn main() {
     }
 }
 
-fn emulator_main(name: &str) -> (usize, Duration) {
+fn emulator_main(name: &str, iterations: usize) -> (usize, Duration) {
     let mut memory: [u8; 256] = [0; 256];
     let mut registers: [u8; 16] = [0; 16];
 
@@ -77,7 +78,12 @@ fn emulator_main(name: &str) -> (usize, Duration) {
         let reg_ptr = registers.as_mut_ptr();
         // println!("{:?}", mem_ptr);
         let start_time = Instant::now();
-        main(mem_ptr, reg_ptr, interface::on_mem_read, interface::on_mem_write, &mut instruction_count as *mut usize);
+        #[allow(unused_assignments)]
+        for _ in 0..iterations {
+            memory = [0; 256];
+            registers = [0; 16];
+            main(mem_ptr, reg_ptr, interface::on_mem_read, interface::on_mem_write, &mut instruction_count as *mut usize);
+        }
         execution_time = start_time.elapsed();
     }
     // println!("{:?}", registers)

@@ -16,4 +16,8 @@ pub struct Args {
     /// Runs the program without a GUI
     #[arg(short, long)]
     pub no_gui: bool,
+
+    /// Number of iterations to run the program
+    #[arg(long, default_value_t = 1)]
+    pub iterations: usize
 }
