@@ -205,7 +205,7 @@ pub fn parse_mc_file(src: &str) -> Vec<u16> {
         .collect()
 }
 
-pub fn transpile(src: &str, count_lines: bool) -> String {
+pub fn transpile(src: &str, count_instructions: bool) -> String {
     let parsed = parse_mc_file(src);
     let instructions = disassemble(&parsed);
     let labels = find_labels(&instructions);
@@ -218,6 +218,10 @@ pub fn transpile(src: &str, count_lines: bool) -> String {
 
     let mut output = String::new();
     for (i, instruction) in instructions.iter().enumerate() {
+        if count_instructions {
+            output += include_str!("benchmark.asm");
+        }
+
         if let Some(label) = label_map.get(&(i as u16)) {
             output += &format!("{label}:\n");
         }

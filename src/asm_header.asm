@@ -2,6 +2,7 @@ BITS 64
 
 section .bss
     ret_addr: resq 1
+    instruction_count: resq 1
     mem_read_callback: resq 1
     mem_write_callback: resq 1
 
@@ -45,4 +46,6 @@ _main:
     mov r13, rdx
     mov [mem_read_callback], r8
     mov [mem_write_callback], r9
+    mov rax, [rsp + 40]
+    mov [instruction_count], rax
     sub rsp, 8
